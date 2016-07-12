@@ -316,7 +316,7 @@ private extension Zephyr {
 
 // MARK: Synchronizers
 
-private extension Zephyr {
+public  extension Zephyr {
 
     /**
 
@@ -326,7 +326,7 @@ private extension Zephyr {
      - parameter dataStore: Signifies if keys should be synchronized to/from iCloud.
 
      */
-    func syncSpecificKeys(keys: [String], dataStore: ZephyrDataStore) {
+    public func syncSpecificKeys(keys: [String], dataStore: ZephyrDataStore) {
 
         for key in keys {
 
@@ -353,7 +353,7 @@ private extension Zephyr {
      - parameter value: The value that will be synchronized. Must be passed with a key, otherwise, nothing will happen.
 
      */
-    func syncToCloud(key key: String? = nil, value: AnyObject? = nil) {
+    public func syncToCloud(key key: String? = nil, value: AnyObject? = nil) {
 
         let ubiquitousStore = NSUbiquitousKeyValueStore.defaultStore()
         ubiquitousStore.setObject(NSDate(), forKey: ZephyrSyncKey)
@@ -400,7 +400,7 @@ private extension Zephyr {
      - parameter value: The value that will be synchronized. Must be passed with a key, otherwise, nothing will happen.
 
      */
-    func syncFromCloud(key key: String? = nil, value: AnyObject? = nil) {
+    public func syncFromCloud(key key: String? = nil, value: AnyObject? = nil) {
 
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(NSDate(), forKey: ZephyrSyncKey)
