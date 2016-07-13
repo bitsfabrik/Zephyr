@@ -271,7 +271,69 @@ public class Zephyr: NSObject {
         removeKeysFromBeingMonitored(keys)
 
     }
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // MARK: - Custom Code
+    ///////////////////////////////////////////////////////////////////////////
+    
+    /*
+     
+     Public method to sync TO iCloud
+     
+     This method will synchronize an array of keys between NSUserDefaults and NSUbiquitousKeyValueStore.
+     
+     - parameter keys: An array of keys that should be synchronized between NSUserDefaults and NSUbiquitousKeyValueStore.
+     
+     */
+    
+    public static func syncUp(keys:[String]){
+        syncWithDirection(keys,givenData: .Local)
+    }
+    
+    /*
+     
+     Public method to sync FROM iCloud
+     
+     This method will synchronize an array of keys between NSUserDefaults and NSUbiquitousKeyValueStore.
+     
+     - parameter keys: An array of keys that should be synchronized between NSUserDefaults and NSUbiquitousKeyValueStore.
+     
+     */
 
+    public static func syncDown(keys:[String]){
+        syncWithDirection(keys,givenData: .Remote)
+    }
+    
+    /*
+     
+     Private Helper method for syncing TO and FROM iCloud.
+     
+     */
+    private static func syncWithDirection(keys:[String],givenData: ZephyrDataStore){
+        
+        switch givenData {
+            
+        case .Local:
+            
+            printGeneralSyncStatus(false, destination: .Remote)
+            
+            dispatch_sync(sharedInstance.zephyrQueue) {
+                sharedInstance.syncSpecificKeys(keys, dataStore: .Local)
+            }
+            printGeneralSyncStatus(true, destination: .Remote)
+            
+        case .Remote:
+            
+            printGeneralSyncStatus(false, destination: .Local)
+            
+            dispatch_sync(sharedInstance.zephyrQueue) {
+                sharedInstance.syncSpecificKeys(keys, dataStore: .Remote)
+            }
+            
+            printGeneralSyncStatus(true, destination: .Local)
+            
+        }
+    }
 }
 
 // MARK: Helpers
@@ -316,7 +378,7 @@ private extension Zephyr {
 
 // MARK: Synchronizers
 
-public  extension Zephyr {
+private extension Zephyr {
 
     /**
 
@@ -326,7 +388,7 @@ public  extension Zephyr {
      - parameter dataStore: Signifies if keys should be synchronized to/from iCloud.
 
      */
-    public func syncSpecificKeys(keys: [String], dataStore: ZephyrDataStore) {
+    private func syncSpecificKeys(keys: [String], dataStore: ZephyrDataStore) {
 
         for key in keys {
 
@@ -353,7 +415,7 @@ public  extension Zephyr {
      - parameter value: The value that will be synchronized. Must be passed with a key, otherwise, nothing will happen.
 
      */
-    public func syncToCloud(key key: String? = nil, value: AnyObject? = nil) {
+    private func syncToCloud(key key: String? = nil, value: AnyObject? = nil) {
 
         let ubiquitousStore = NSUbiquitousKeyValueStore.defaultStore()
         ubiquitousStore.setObject(NSDate(), forKey: ZephyrSyncKey)
@@ -400,7 +462,7 @@ public  extension Zephyr {
      - parameter value: The value that will be synchronized. Must be passed with a key, otherwise, nothing will happen.
 
      */
-    public func syncFromCloud(key key: String? = nil, value: AnyObject? = nil) {
+    private func syncFromCloud(key key: String? = nil, value: AnyObject? = nil) {
 
         let defaults = NSUserDefaults.standardUserDefaults()
         defaults.setObject(NSDate(), forKey: ZephyrSyncKey)
